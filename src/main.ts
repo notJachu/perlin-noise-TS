@@ -45,22 +45,49 @@ var y = 0.2;
 var inc = 0.05;
 var xoff = 0.1;
 var yoff = 0.1;
+var zoff = 0.1;
 
 var image = ctx.createImageData(canvas.width, canvas.height);
 var data = image.data;
 
-for (let x = 0; x < width; x += scale) {
-  for (let y = 0; y < height; y += scale) {
-    let value = noise(xoff, yoff, 0.1);
-    //let value = Noise2D(xoff, yoff);
-    value = (value + 1) / 2;
-    //console.log(value);
-    ctx.fillStyle = `rgb(${value * 255}, ${value * 255}, ${value * 255})`;
-    ctx.fillRect(x, y, scale, scale);
-    yoff += inc;
+function drawFrame(){
+  for (let x = 0; x < width; x += scale) {
+    for (let y = 0; y < height; y += scale) {
+      let value = noise(xoff, yoff, zoff);
+      //let value = Noise2D(xoff, yoff);
+      value = (value + 1) / 2;
+      //console.log(value);
+      ctx.fillStyle = `rgb(${value * 255}, ${value * 255}, ${value * 255})`;
+      ctx.fillRect(x, y, scale, scale);
+      yoff += inc;
+    }
+    xoff += inc;
+    yoff = 0;
   }
-  xoff += inc;
-  yoff = 0;
+  xoff = 0;
+  zoff += inc;
 }
+
+const fps = 30; // Frames per second
+const frameTime = 1000 / fps; // Time per frame in milliseconds
+
+let lastFrameTime = performance.now();
+
+function animate() {
+  const currentTime = performance.now();
+  const deltaTime = currentTime - lastFrameTime;
+
+  if (deltaTime >= frameTime) {
+    // Render the frame
+    drawFrame();
+
+    lastFrameTime = currentTime;
+  }
+
+  requestAnimationFrame(animate);
+}
+
+animate();
+
 
 console.log(noise(1.1,4.4,0))
