@@ -4,6 +4,7 @@ import viteLogo from '/vite.svg'
 import { setupCounter } from './counter.ts'
 import { magicButton } from './counter.ts'
 import { noise } from './perlin.ts'
+import { Noise2D } from './alt.ts'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
   <div>
@@ -19,7 +20,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
       <button id="magic" type="button">Magic button</button>
   </div>
-  <canvas id="canvas"></canvas>
+  <canvas id="canvas" width="300" height="300"></canvas>
 
 `
 
@@ -33,31 +34,33 @@ const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
 const scale = 5;
 
-const width = 200;
-const height = 200;
+const width = 300;
+const height = 300;
 
 canvas.width = width;
 canvas.height = height;
-var x = 0;
-var y = 0;
+var x = 0.2;
+var y = 0.2;
 
-while (x < width - 5) {
-  while (y < height - 5) {
-    const value = noise(x / 10, y / 10, 0)
-    ctx.fillStyle = `rgb(${value * 255}, ${value * 255}, ${value * 255})`;
-    ctx.fillRect(x * scale, y * scale, scale, scale);
-    y += scale;
-    console.log(y);
-  }
-  y = 0;
-  x += scale;
-}
+var inc = 0.05;
+var xoff = 0.1;
+var yoff = 0.1;
 
+var image = ctx.createImageData(canvas.width, canvas.height);
+var data = image.data;
 
 for (let x = 0; x < width; x += scale) {
   for (let y = 0; y < height; y += scale) {
-    const value = noise(x / 10, y / 10, 0);
+    let value = noise(xoff, yoff, 0.1);
+    //let value = Noise2D(xoff, yoff);
+    value = (value + 1) / 2;
+    //console.log(value);
     ctx.fillStyle = `rgb(${value * 255}, ${value * 255}, ${value * 255})`;
     ctx.fillRect(x, y, scale, scale);
+    yoff += inc;
   }
+  xoff += inc;
+  yoff = 0;
 }
+
+console.log(noise(1.1,4.4,0))
