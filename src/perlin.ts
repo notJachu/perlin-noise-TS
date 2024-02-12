@@ -1,7 +1,8 @@
 // Implementation of Perlin noise alg from Ken Perlin's
 // "Improved Noise reference implementation"
 // https://cs.nyu.edu/~perlin/noise/
-
+// Optimizations and inspiration
+// https://github.com/josephg/noisejs
 
 // Fade function
 function fade(t: number): number{
@@ -13,7 +14,7 @@ function lerp(a: number, b: number, t: number): number{
     return (1-t)*a + t*b;
 }
 
-// Gradient function
+// Gradient function and dot product
 class grad {
     x: number;
     y: number;
@@ -35,7 +36,7 @@ var grad3 = [new grad(1, 1, 0), new grad(-1, 1, 0), new grad(1, -1, 0), new grad
     new grad(0, 1, 1), new grad(0, -1, 1), new grad(0, 1, -1), new grad(0, -1, -1)];
 
 
-
+// Permutation table
 var p = [151,160,137,91,90,15,
     131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
     190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
@@ -53,6 +54,7 @@ var p = [151,160,137,91,90,15,
 var perm = new Array(512);
 var gradP:grad[] = new Array(512);
 
+// Randomize permutation table
 var seed = Math.random() * 1000000;
 
 for (let i = 0; i < 256; i++) {
@@ -65,7 +67,6 @@ for (let i = 0; i < 256; i++) {
 
       perm[i] = perm[i + 256] = v;
       gradP[i] = gradP[i + 256] = grad3[v % 12];
-      //console.log(gradP[i], perm[i]);
 }
 
 // Perlin noise function
@@ -101,10 +102,7 @@ export function noise(x: number, y: number, z:number): number{
     hash_table[6] = gradP[cube[0]+1+perm[cube[1]+1+perm[cube[2]  ]]].dot(x-1, y-1,   z);
     hash_table[7] = gradP[cube[0]+1+perm[cube[1]+1+perm[cube[2]+1]]].dot(x-1, y-1, z-1);
 
-    // This giant chunk of something blends the results of 8 corners of the cube
-    // Don't quite understand it, it's copied from Ken Perlin's implementation
-    // should raarrange values in lerp
-    // used function that has t on 3rd arg not 1st
+    // Interpolate the 8 hash values
     const res = lerp(
         lerp(
           lerp(hash_table[0], hash_table[4], fade_curves[0]),
