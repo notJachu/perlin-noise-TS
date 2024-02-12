@@ -3,17 +3,17 @@ import { noise } from './perlin.ts'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
-  <canvas id="canvas" width="300" height="300"></canvas>
+  <canvas id="canvas" width="1920" height="1080"></canvas>
 
 `
 
 const canvas = document.getElementById('canvas') as HTMLCanvasElement
 const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-const scale = 3;
+const scale = 20;
 
-const width = 300;
-const height = 300;
+const width = 500;
+const height = 500;
 
 canvas.width = width;
 canvas.height = height;
@@ -23,16 +23,34 @@ var xoff = 0.1;
 var yoff = 0.1;
 var zoff = 0.1;
 
+class vec2 {
+ 
+  x: number;
+  y: number;
+  constructor(x: number, y: number) {
+    this.x = x;
+    this.y = y;
+  }
+
+  fromAngle(angle: number) {
+    return new vec2(Math.cos(angle), Math.sin(angle));
+  }
+}
 
 function drawFrame(){
+  ctx.clearRect(0, 0, width, height);
   for (let x = 0; x < width; x += scale) {
     for (let y = 0; y < height; y += scale) {
       let value = noise(xoff, yoff, zoff);
-      //let value = Noise2D(xoff, yoff);
       value = (value + 1) / 2;
-      //console.log(value);
-      ctx.fillStyle = `rgb(${value * 255}, ${value * 255}, ${value * 255})`;
-      ctx.fillRect(x, y, scale, scale);
+      //ctx.fillStyle = `rgb(${value * 255}, ${value * 255}, ${value * 255})`;
+      //ctx.fillRect(x, y, scale, scale);
+      let v = vec2.prototype.fromAngle(value * Math.PI * 2);
+      ctx.beginPath();
+      ctx.moveTo(x + scale / 2, y + scale / 2);
+      ctx.lineTo(x + scale / 2 + v.x * scale / 2, y + scale / 2 + v.y * scale / 2);
+      ctx.stroke();
+      ctx.closePath();
       yoff += inc;
     }
     xoff += inc;
