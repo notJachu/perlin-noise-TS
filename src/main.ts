@@ -35,10 +35,79 @@ class vec2 {
   fromAngle(angle: number) {
     return new vec2(Math.cos(angle), Math.sin(angle));
   }
+
+  add(v: vec2) {
+    this.x += v.x;
+    this.y += v.y;
+  }
 }
+
+class particle {
+  pos: vec2;
+  vel: vec2;
+  acc: vec2;
+  prevPos: vec2;
+
+  constructor(x: number, y: number) {
+    this.pos = new vec2(x, y);
+    this.vel = new vec2(0, 0);
+    this.acc = new vec2(0, 0);
+    this.prevPos = this.pos;
+  }
+
+  update() {
+    this.prevPos = this.pos;
+    this.vel.add(this.acc);
+    this.pos.add(this.vel);
+    this.acc = new vec2(0, 0);
+  }
+
+  wrap() {
+    if (this.pos.x > width) {
+      this.pos.x = 0;
+      this.prevPos = this.pos;
+    }
+    if (this.pos.x < 0) {
+      this.pos.x = width;
+      this.prevPos = this.pos;
+    }
+    if (this.pos.y > height) {
+      this.pos.y = 0;
+      this.prevPos = this.pos;
+    }
+    if (this.pos.y < 0) {
+      this.pos.y = height;
+      this.prevPos = this.pos;
+    }
+  }
+
+  applyForce(force: vec2) {
+    this.acc.add(force);
+  }
+
+  findForce() {
+    
+  }
+
+  draw() {
+    // ctx.beginPath();
+    // ctx.moveTo(this.prevPos.x, this.prevPos.y);
+    // ctx.lineTo(this.pos.x, this.pos.y);
+    // ctx.stroke();
+    // ctx.closePath();
+    ctx.fillStyle = 'black';
+    ctx.fillRect(this.pos.x, this.pos.y, 5, 5);
+  }
+
+}
+
+var particles:particle[] = [];
+particles.push(new particle(0, 0));
 
 function drawFrame(){
   ctx.clearRect(0, 0, width, height);
+  particles[0].draw();
+  particles[0].update();
   for (let x = 0; x < width; x += scale) {
     for (let y = 0; y < height; y += scale) {
       let value = noise(xoff, yoff, zoff);
@@ -47,8 +116,8 @@ function drawFrame(){
       //ctx.fillRect(x, y, scale, scale);
       let v = vec2.prototype.fromAngle(value * Math.PI * 2);
       ctx.beginPath();
-      ctx.moveTo(x + scale / 2, y + scale / 2);
-      ctx.lineTo(x + scale / 2 + v.x * scale / 2, y + scale / 2 + v.y * scale / 2);
+      ctx.moveTo(x + scale , y + scale );
+      ctx.lineTo(x + scale  + v.x * scale , y + scale  + v.y * scale );
       ctx.stroke();
       ctx.closePath();
       yoff += inc;
