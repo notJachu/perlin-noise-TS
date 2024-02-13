@@ -10,7 +10,7 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 const canvas = document.getElementById('canvas') as HTMLCanvasElement
 const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
-const scale = 20;
+const scale = 25;
 
 const width = 500;
 const height = 500;
@@ -52,12 +52,16 @@ class particle {
     this.pos = new vec2(x, y);
     this.vel = new vec2(0, 0);
     this.acc = new vec2(0, 0);
-    this.prevPos = this.pos;
+    this.prevPos = new vec2(x, y);
   }
 
   update() {
-    this.prevPos = this.pos;
+    const vMax = 5;
+    this.prevPos.x = this.pos.x;
+    this.prevPos.y = this.pos.y;
     this.vel.add(this.acc);
+    this.vel.x = Math.min(Math.max(this.vel.x, -vMax), vMax);
+    this.vel.y = Math.min(Math.max(this.vel.y, -vMax), vMax);
     this.pos.add(this.vel);
     this.acc = new vec2(0, 0);
   }
@@ -65,19 +69,19 @@ class particle {
   wrap() {
     if (this.pos.x > width) {
       this.pos.x = 0;
-      this.prevPos = this.pos;
+      this.prevPos.x = this.pos.x;
     }
     if (this.pos.x < 0) {
       this.pos.x = width;
-      this.prevPos = this.pos;
+      this.prevPos.x = this.pos.x;
     }
     if (this.pos.y > height) {
       this.pos.y = 0;
-      this.prevPos = this.pos;
+      this.prevPos.y = this.pos.y;
     }
     if (this.pos.y < 0) {
       this.pos.y = height;
-      this.prevPos = this.pos;
+      this.prevPos.y = this.pos.y;
     }
   }
 
@@ -85,47 +89,79 @@ class particle {
     this.acc.add(force);
   }
 
-  findForce() {
+  followField() {
+    let x = Math.floor(this.pos.x / scale); // get the grid position
+    let y = Math.floor(this.pos.y / scale);
+    //let angle = noise(this.pos.x, this.pos.y, zoff) * Math.PI * 2; // get the angle from the noise
+    let angle = (noise(x * xoff, y * xoff, zoff) + 1) * Math.PI; // get the angle from the noise
+    let v = vec2.prototype.fromAngle(angle);
+    v.x *= 0.5;
+    v.y *= 0.5;
+    //console.log(v);
+    // console.log(x, y);
     
+    this.applyForce(v);
+    // ctx.beginPath();
+    // ctx.moveTo(this.pos.x, this.pos.y);
+    // ctx.lineTo(this.pos.x + v.x * scale, this.pos.y + v.y * scale);
+    // ctx.stroke();
+    // ctx.closePath();
   }
 
   draw() {
-    // ctx.beginPath();
-    // ctx.moveTo(this.prevPos.x, this.prevPos.y);
-    // ctx.lineTo(this.pos.x, this.pos.y);
-    // ctx.stroke();
-    // ctx.closePath();
-    ctx.fillStyle = 'black';
-    ctx.fillRect(this.pos.x, this.pos.y, 5, 5);
+    ctx.strokeStyle = `rgba(0, 0, 0, 0.01)`; // Set stroke color with reduced alpha
+    ctx.beginPath();
+    ctx.moveTo(this.prevPos.x, this.prevPos.y);
+    ctx.lineTo(this.pos.x, this.pos.y);
+    ctx.stroke();
+      // console.log(this.pos.x, this.pos.y);
+      // console.log(" ");
+      // console.log(this.prevPos.x, this.prevPos.y);
+    ctx.closePath();
+    // ctx.fillStyle = 'black';
+    // ctx.fillRect(this.pos.x, this.pos.y, 5, 5);
   }
 
 }
-
+// no need to compute full field can only compute the field for the particle
 var particles:particle[] = [];
-particles.push(new particle(0, 0));
+for (let i = 0; i < 5000 ; i++) {
+  particles.push(new particle(Math.random() * width, Math.random() * height));
+}
 
-function drawFrame(){
-  ctx.clearRect(0, 0, width, height);
-  particles[0].draw();
-  particles[0].update();
-  for (let x = 0; x < width; x += scale) {
-    for (let y = 0; y < height; y += scale) {
+function drawField() {
+  for (let x = 0; x <= width; x += scale) {
+    for (let y = 0; y <= height; y += scale) {
       let value = noise(xoff, yoff, zoff);
       value = (value + 1) / 2;
       //ctx.fillStyle = `rgb(${value * 255}, ${value * 255}, ${value * 255})`;
       //ctx.fillRect(x, y, scale, scale);
       let v = vec2.prototype.fromAngle(value * Math.PI * 2);
       ctx.beginPath();
-      ctx.moveTo(x + scale , y + scale );
-      ctx.lineTo(x + scale  + v.x * scale , y + scale  + v.y * scale );
+      ctx.moveTo(x  , y  );
+      ctx.lineTo(x   + v.x * scale , y   + v.y * scale );
       ctx.stroke();
       ctx.closePath();
+      //ctx.fillRect(x + scale, y + scale, 5, 5);
+      //ctx.fillRect(x, y , 5 , 5);
       yoff += inc;
     }
     xoff += inc;
     yoff = 0;
   }
   xoff = 0;
+  zoff += 0.005;
+}
+
+function drawFrame(){
+  // ctx.clearRect(0, 0, width, height);
+  particles.forEach(particle => {
+    particle.followField();
+    particle.update();
+    particle.wrap();
+    particle.draw();
+  });
+  //drawField();
   zoff += inc;
 }
 
