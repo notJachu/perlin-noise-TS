@@ -5,6 +5,20 @@ document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
   <div id="container">
     <h1>Hello Vite!</h1>
+    <div class="break"></div>
+    <nav>
+      <ul>
+      <li>
+        <a href="#" class="nav_link">Link 1</a>
+      </li>
+      <li>
+        <a href="#" class="nav_link">Link 2</a>
+      </li>
+      <li>
+        <a href="#" class="nav_link">Link 3</a>
+      </li>
+    </ul>
+    </nav>
     <canvas id="canvas" width="1920" height="1080"></canvas>
   </div>
 
@@ -25,7 +39,7 @@ var inc = 0.05;
 var xoff = 0.1;
 var yoff = 0.1;
 var zoff = 0.1;
-var val = 0;
+var val = 0.05;
 
 var dt = 0;
 
@@ -163,7 +177,8 @@ function drawField() {
 
 function drawFrame(){
   // ctx.clearRect(0, 0, width, height);
-  val = (-(Math.atan(dt-3) / 8) + Math.PI/8) * 0.01;
+  //val = (-(Math.atan(dt-3) / 8) + Math.PI/8) * 0.01;
+  val *= 0.9;
   particles.forEach(particle => {
     particle.followField();
     particle.update();

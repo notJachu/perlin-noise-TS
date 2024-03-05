@@ -75,20 +75,61 @@ button:focus-visible {
 }
 
 canvas{
-  position: relative;
+  position: absolute;
   z-index: 1;
   width: 100vw;
   height: 100vh;
+}
+
+nav{
+  position: relative;
+  z-index: 2;
+  margin: auto;
+}
+nav ul{
+  list-style-type: none;
+  padding: 0;
+}
+
+nav ul li{
+  display: inline-block;
+  padding: 1rem;
+  justify-content: space-between;
+}
+
+.nav_link{
+  text-decoration: none;
+}
+
+.nav_link::after{
+  content: '';
+  display: block;
+  height: 3px;
+  border-radius: 5px;
+  width: 0;
+  background-color: #747bff;
+  transition: ease-in-out 0.3s;
+}
+
+a:hover:after{
+  width: 100%;
+}
+
+.break {
+  flex-basis: 100%;
+  height: 0;
 }
 
 #container {
   display: flex;
   justify-content: center;
   align-items: center;
+  flex-direction: row;
+  flex-wrap: wrap;
+  position: relative;
 }
 
 #container h1{
-  position: absolute;
   height: fit-content;
   width: fit-content;
   z-index: 2;
