@@ -3,7 +3,10 @@ import { noise } from './perlin.ts'
 
 document.querySelector<HTMLDivElement>('#app')!.innerHTML = `
 
-  <canvas id="canvas" width="1920" height="1080"></canvas>
+  <div id="container">
+    <h1>Hello Vite!</h1>
+    <canvas id="canvas" width="1920" height="1080"></canvas>
+  </div>
 
 `
 
@@ -12,8 +15,8 @@ const ctx = canvas.getContext('2d') as CanvasRenderingContext2D;
 
 const scale = 25;
 
-const width = 500;
-const height = 500;
+const width = 1600;
+const height = 900;
 
 canvas.width = width;
 canvas.height = height;
@@ -22,6 +25,9 @@ var inc = 0.05;
 var xoff = 0.1;
 var yoff = 0.1;
 var zoff = 0.1;
+var val = 0;
+
+var dt = 0;
 
 class vec2 {
  
@@ -93,9 +99,9 @@ class particle {
     let x = Math.floor(this.pos.x / scale); // get the grid position
     let y = Math.floor(this.pos.y / scale);
     //let angle = noise(this.pos.x, this.pos.y, zoff) * Math.PI * 2; // get the angle from the noise
-    let angle = (noise(x * xoff, y * xoff, zoff) + 1) * Math.PI; // get the angle from the noise
+    let angle = (noise(x * xoff, y * xoff, zoff) + 1) * Math.PI; // get the angle from the noise between 0 and 2PI
     let v = vec2.prototype.fromAngle(angle);
-    v.x *= 0.5;
+    v.x *= 0.5; // strength of the vector
     v.y *= 0.5;
     //console.log(v);
     // console.log(x, y);
@@ -109,7 +115,8 @@ class particle {
   }
 
   draw() {
-    ctx.strokeStyle = `rgba(0, 0, 0, 0.01)`; // Set stroke color with reduced alpha
+    //val = 0.05;
+    ctx.strokeStyle = `rgba(0, 0, 0, ${val})`; // Set stroke color with reduced alpha
     ctx.beginPath();
     ctx.moveTo(this.prevPos.x, this.prevPos.y);
     ctx.lineTo(this.pos.x, this.pos.y);
@@ -125,7 +132,7 @@ class particle {
 }
 // no need to compute full field can only compute the field for the particle
 var particles:particle[] = [];
-for (let i = 0; i < 5000 ; i++) {
+for (let i = 0; i < 30000 ; i++) {
   particles.push(new particle(Math.random() * width, Math.random() * height));
 }
 
@@ -153,8 +160,10 @@ function drawField() {
   zoff += 0.005;
 }
 
+
 function drawFrame(){
   // ctx.clearRect(0, 0, width, height);
+  val = (-(Math.atan(dt-3) / 8) + Math.PI/8) * 0.01;
   particles.forEach(particle => {
     particle.followField();
     particle.update();
@@ -163,7 +172,10 @@ function drawFrame(){
   });
   //drawField();
   zoff += inc;
+  dt += 0.5;
+  console.log(val);
 }
+
 
 const fps = 30; // Frames per second
 const frameTime = 1000 / fps; // Time per frame in milliseconds
@@ -182,6 +194,8 @@ function animate() {
   }
 
   requestAnimationFrame(animate);
+  console.log(dt);
 }
 
 animate();
+
